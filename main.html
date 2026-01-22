@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анкета співробітника</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 15px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            min-height: 100vh;
+            padding-bottom: 100px; /* Место для кнопок */
+        }
+        
+        /* Для десктопа - боковые кнопки справа */
+        .side-buttons {
+            position: fixed;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        /* Для мобильных - кнопки внизу */
+        .mobile-buttons {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        
+        .mobile-buttons-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-box { 
+            max-width: 600px; 
+            margin: 20px auto; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 25px; 
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 { 
+            color: #2c3e50; 
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .form-row { 
+            margin: 18px 0; 
+        }
+        
+        label { 
+            display: block; 
+            font-weight: 600; 
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .required { 
+            color: #e74c3c; 
+        }
+        
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Стили для десктопных кнопок */
+        .side-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 120px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .export-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .side-button:hover, .side-button:active {
+            opacity: 0.9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        /* Стили для мобильных кнопок */
+        .mobile-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            border: none; 
+            padding: 16px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            flex: 1;
+            font-weight: 600;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            min-height: 70px;
+        }
+        
+        .mobile-button.delete-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .mobile-button.export-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .mobile-button:active {
+            opacity: 0.9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .mobile-button i {
+            font-size: 20px;
+        }
+        
+        .status-message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 10px;
+            display: none;
+            font-weight: 500;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            color: #155724;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .original-value {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            display: none;
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+        
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                padding-bottom: 100px; /* Место для мобильных кнопок */
+            }
+            
+            .form-box {
+                margin: 10px auto;
+                padding: 20px;
+                border-radius: 15px;
+                width: 95%;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            
+            /* Скрываем боковые кнопки на мобильных */
+            .side-buttons {
+                display: none;
+            }
+            
+            /* Показываем мобильные кнопки */
+            .mobile-buttons {
+                display: block;
+            }
+            
+            input, select, textarea {
+                padding: 12px;
+                font-size: 16px;
+                -webkit-appearance: none;
+                border-radius: 8px;
+            }
+            
+            select {
+                background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 16px;
+                padding-right: 40px;
+            }
+            
+            .form-row {
+                margin: 15px 0;
+            }
+            
+            label {
+                font-size: 0.95rem;
+            }
+            
+            /* Улучшение для мобильного ввода */
+            input[type="tel"], input[type="text"], input[type="email"] {
+                font-size: 16px; /* Предотвращает зум на iOS */
+            }
+            
+            /* Адаптация для очень маленьких экранов */
+            @media (max-width: 480px) {
+                .mobile-buttons {
+                    padding: 12px;
+                }
+                
+                .mobile-button {
+                    padding: 14px 8px;
+                    font-size: 0.75rem;
+                    min-height: 65px;
+                }
+                
+                .mobile-button span {
+                    font-size: 0.7rem;
+                }
+                
+                .mobile-button i {
+                    font-size: 18px;
+                }
+                
+                .form-box {
+                    padding: 15px;
+                }
+            }
+            
+            /* Для горизонтальной ориентации */
+            @media (max-height: 500px) and (orientation: landscape) {
+                .mobile-buttons {
+                    padding: 10px;
+                }
+                
+                .mobile-button {
+                    min-height: 55px;
+                    padding: 10px 6px;
+                }
+                
+                body {
+                    padding-bottom: 80px;
+                }
+            }
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-box {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .mobile-buttons {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* Стили для placeholder */
+        ::placeholder {
+            color: #999;
+            opacity: 0.7;
+        }
+        
+        /* Улучшение скролла на мобильных */
+        @media (max-width: 768px) {
+            html {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        
+        /* Улучшение для iOS */
+        input, select, textarea {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Предотвращение масштабирования при фокусе на iOS */
+        @media screen and (max-width: 768px) {
+            input[type="text"]:focus,
+            input[type="tel"]:focus,
+            input[type="email"]:focus,
+            textarea:focus {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Для десктопа (широкие экраны) */
+        @media (min-width: 769px) {
+            .mobile-buttons {
+                display: none !important;
+            }
+            
+            .side-buttons {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Боковые кнопки для десктопа -->
+<div class="side-buttons">
+    <button class="side-button" onclick="saveForm()">
+        <i class="fa fa-save"></i> Зберегти
+    </button>
+    
+    <button class="side-button export-btn" onclick="exportToCSV()">
+        <i class="fa fa-download"></i> CSV
+    </button>
+    
+    <button class="side-button delete-btn" onclick="deleteForm()">
+        <i class="fa fa-trash"></i> Видалити
+    </button>
+</div>
+
+<!-- Мобильные кнопки внизу -->
+<div class="mobile-buttons">
+    <div class="mobile-buttons-container">
+        <button class="mobile-button" onclick="saveForm()">
+            <i class="fa fa-save"></i>
+            <span>Зберегти</span>
+        </button>
+        
+        <button class="mobile-button export-btn" onclick="exportToCSV()">
+            <i class="fa fa-download"></i>
+            <span>CSV</span>
+        </button>
+        
+        <button class="mobile-button delete-btn" onclick="deleteForm()">
+            <i class="fa fa-trash"></i>
+            <span>Видалити</span>
+        </button>
+    </div>
+</div>
+
+<div class="form-box">
+    <h2><i class="fa fa-user" style="margin-right: 10px;"></i>Анкета співробітника</h2>
+    
+    <form id="employeeForm">
+        <div class="form-row">
+            <label>Прізвище Ім'я По батькові <span class="required">*</span></label>
+            <input type="text" id="fio" placeholder="Введіть ПІБ" required>
+        </div>
+        
+        <div class="form-row">
+            <label>Номер телефону <span class="required">*</span></label>
+            <input type="tel" id="phone" placeholder="+380 (___) ___-__-__" required>
+            <div id="phoneOriginal" class="original-value">Оригінал: </div>
+        </div>
+        
+        <div class="form-row">
+            <label>Email <span class="required">*</span></label>
+            <input type="email" id="email" placeholder="example@company.ua" required>
+        </div>
+        
+        <div class="form-row">
+            <label>IP-адреса <span class="required">*</span></label>
+            <input type="text" id="ip" placeholder="___.___.___.___" required>
+            <div id="ipOriginal" class="original-value">Оригінал: </div>
+        </div>
+        
+        <div class="form-row">
+            <label>Відділ <span class="required">*</span></label>
+            <select id="department" required onchange="showPosition()">
+                <option value="">Оберіть відділ</option>
+                <option value="it">IT-відділ</option>
+                <option value="sales">Відділ продажів</option>
+                <option value="accounting">Бухгалтерія</option>
+                <option value="production">Виробництво</option>
+                <option value="hr">Відділ кадрів</option>
+                <option value="other">Інший відділ</option>
+            </select>
+        </div>
+        
+        <div class="form-row hidden" id="itPositions">
+            <label>Посада в IT <span class="required">*</span></label>
+            <select id="itPosition">
+                <option value="">Оберіть посаду</option>
+                <option value="developer">Розробник</option>
+                <option value="admin">Системний адміністратор</option>
+                <option value="support">Технічна підтримка</option>
+                <option value="qa">Тестувальник (QA)</option>
+                <option value="analyst">Аналітик</option>
+            </select>
+        </div>
+        
+        <div class="form-row hidden" id="salesPositions">
+            <label>Посада в продажах <span class="required">*</span></label>
+            <select id="salesPosition">
+                <option value="">Оберіть посаду</option>
+                <option value="manager">Менеджер з продажів</option>
+                <option value="head">Керівник відділу</option>
+                <option value="account_manager">Менеджер з роботи з клієнтами</option>
+            </select>
+        </div>
+        
+        <div class="form-row hidden" id="productionPositions">
+            <label>Посада на виробництві <span class="required">*</span></label>
+            <select id="productionPosition">
+                <option value="">Оберіть посаду</option>
+                <option value="worker">Робочий</option>
+                <option value="master">Майстер</option>
+                <option value="engineer">Інженер</option>
+                <option value="operator">Оператор</option>
+            </select>
+        </div>
+        
+        <div class="form-row hidden" id="hrPositions">
+            <label>Посада у відділі кадрів <span class="required">*</span></label>
+            <select id="hrPosition">
+                <option value="">Оберіть посаду</option>
+                <option value="hr_manager">HR-менеджер</option>
+                <option value="recruiter">Рекрутер</option>
+                <option value="hr_director">Директор з персоналу</option>
+            </select>
+        </div>
+        
+        <div class="form-row hidden" id="accountingPositions">
+            <label>Посада в бухгалтерії <span class="required">*</span></label>
+            <select id="accountingPosition">
+                <option value="">Оберіть посаду</option>
+                <option value="accountant">Бухгалтер</option>
+                <option value="chief_accountant">Головний бухгалтер</option>
+                <option value="economist">Економіст</option>
+            </select>
+        </div>
+        
+        <div class="form-row hidden" id="otherPosition">
+            <label>Посада <span class="required">*</span></label>
+            <input type="text" id="customPosition" placeholder="Введіть вашу посаду">
+        </div>
+        
+        <div class="form-row">
+            <label>Номер кабінету/місце <span class="required">*</span></label>
+            <input type="text" id="office" placeholder="___А, Цех №_, Склад" required>
+            <div id="officeOriginal" class="original-value">Оригінал: </div>
+        </div>
+        
+        <div class="form-row">
+            <label><i class="fa fa-info-circle"></i> Додаткова інформація</label>
+            <textarea id="additional" rows="4" placeholder="Додаткові відомості, обладнання, примітки..."></textarea>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+    </form>
+</div>
+
+<script>
+    let allEmployees = JSON.parse(localStorage.getItem('employees')) || [];
+    let originalValues = {
+        phone: '',
+        ip: '',
+        office: ''
+    };
+    
+    function showPosition() {
+        const allPositions = ['itPositions', 'salesPositions', 'productionPositions', 'hrPositions', 'accountingPositions', 'otherPosition'];
+        allPositions.forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        
+        const dept = document.getElementById('department').value;
+        if (dept === 'it') {
+            document.getElementById('itPositions').classList.remove('hidden');
+        } else if (dept === 'sales') {
+            document.getElementById('salesPositions').classList.remove('hidden');
+        } else if (dept === 'production') {
+            document.getElementById('productionPositions').classList.remove('hidden');
+        } else if (dept === 'hr') {
+            document.getElementById('hrPositions').classList.remove('hidden');
+        } else if (dept === 'accounting') {
+            document.getElementById('accountingPositions').classList.remove('hidden');
+        } else if (dept === 'other') {
+            document.getElementById('otherPosition').classList.remove('hidden');
+        }
+    }
+    
+    function saveForm() {
+        if (validateForm()) {
+            const data = getFormData();
+            const employeeId = Date.now();
+            
+            const employee = {
+                id: employeeId,
+                fio: data.fio,
+                phone: originalValues.phone || data.phone,
+                email: data.email,
+                ip: originalValues.ip || data.ip,
+                department: data.department,
+                position: data.position,
+                positionText: data.positionText,
+                office: originalValues.office || data.office,
+                additional: data.additional,
+                timestamp: new Date().toISOString()
+            };
+            
+            allEmployees.push(employee);
+            localStorage.setItem('employees', JSON.stringify(allEmployees));
+            
+            showStatus('✅ Дані збережено', 'success');
+            vibratePhone();
+        }
+    }
+    
+    function showStatus(message, type) {
+        const statusDiv = document.getElementById('statusMessage');
+        statusDiv.textContent = message;
+        statusDiv.className = `status-message ${type}`;
+        statusDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 3000);
+    }
+    
+    function deleteForm() {
+        if (confirm('Ви впевнені, що хочете видалити всі дані форми?')) {
+            document.getElementById('employeeForm').reset();
+            
+            const allPositions = ['itPositions', 'salesPositions', 'productionPositions', 'hrPositions', 'accountingPositions', 'otherPosition'];
+            allPositions.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            
+            originalValues = { phone: '', ip: '', office: '' };
+            document.getElementById('phoneOriginal').style.display = 'none';
+            document.getElementById('ipOriginal').style.display = 'none';
+            document.getElementById('officeOriginal').style.display = 'none';
+            
+            showStatus('Форму очищено', 'success');
+            vibratePhone();
+        }
+    }
+    
+    function vibratePhone() {
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    }
+    
+    function validateForm() {
+        const dept = document.getElementById('department').value;
+        let position = '';
+        let positionValid = true;
+        
+        if (dept === 'it') {
+            position = document.getElementById('itPosition').value;
+            positionValid = !!position;
+        } else if (dept === 'sales') {
+            position = document.getElementById('salesPosition').value;
+            positionValid = !!position;
+        } else if (dept === 'production') {
+            position = document.getElementById('productionPosition').value;
+            positionValid = !!position;
+        } else if (dept === 'hr') {
+            position = document.getElementById('hrPosition').value;
+            positionValid = !!position;
+        } else if (dept === 'accounting') {
+            position = document.getElementById('accountingPosition').value;
+            positionValid = !!position;
+        } else if (dept === 'other') {
+            position = document.getElementById('customPosition').value;
+            positionValid = !!position.trim();
+        }
+        
+        if (!positionValid) {
+            showStatus('Будь ласка, оберіть або введіть посаду', 'error');
+            return false;
+        }
+        
+        const requiredFields = ['fio', 'phone', 'email', 'ip', 'office'];
+        for (let fieldId of requiredFields) {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim() || field.value.includes('_')) {
+                showStatus('Заповніть усі обов\'язкові поля', 'error');
+                field.focus();
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    function getFormData() {
+        const dept = document.getElementById('department').value;
+        let position = '';
+        let positionText = '';
+        
+        if (dept === 'it') {
+            position = document.getElementById('itPosition').value;
+            positionText = document.getElementById('itPosition').options[document.getElementById('itPosition').selectedIndex]?.text || '';
+        } else if (dept === 'sales') {
+            position = document.getElementById('salesPosition').value;
+            positionText = document.getElementById('salesPosition').options[document.getElementById('salesPosition').selectedIndex]?.text || '';
+        } else if (dept === 'production') {
+            position = document.getElementById('productionPosition').value;
+            positionText = document.getElementById('productionPosition').options[document.getElementById('productionPosition').selectedIndex]?.text || '';
+        } else if (dept === 'hr') {
+            position = document.getElementById('hrPosition').value;
+            positionText = document.getElementById('hrPosition').options[document.getElementById('hrPosition').selectedIndex]?.text || '';
+        } else if (dept === 'accounting') {
+            position = document.getElementById('accountingPosition').value;
+            positionText = document.getElementById('accountingPosition').options[document.getElementById('accountingPosition').selectedIndex]?.text || '';
+        } else if (dept === 'other') {
+            position = document.getElementById('customPosition').value;
+            positionText = document.getElementById('customPosition').value;
+        }
+        
+        return {
+            fio: document.getElementById('fio').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            ip: document.getElementById('ip').value,
+            department: document.getElementById('department').options[document.getElementById('department').selectedIndex].text,
+            position: position,
+            positionText: positionText,
+            office: document.getElementById('office').value,
+            additional: document.getElementById('additional').value
+        };
+    }
+    
+    function formatPhoneNumber(input) {
+        let value = input.value.replace(/\D/g, '');
+        const original = input.value;
+        
+        if (value.length >= 12) {
+            originalValues.phone = '+' + value;
+            document.getElementById('phoneOriginal').textContent = 'Оригінал: ' + originalValues.phone;
+            document.getElementById('phoneOriginal').style.display = 'block';
+        }
+        
+        let formatted = '';
+        if (value.startsWith('380')) {
+            formatted = '+380';
+            value = value.substring(3);
+        } else if (value.startsWith('80')) {
+            formatted = '+380';
+            value = value.substring(2);
+        } else if (value.startsWith('0')) {
+            formatted = '+380';
+            value = value.substring(1);
+        } else if (value.length > 0) {
+            formatted = '+380';
+        }
+        
+        if (value.length > 0) {
+            formatted += ' (';
+            if (value.length > 3) {
+                formatted += '000) ';
+                value = value.substring(3);
+            } else {
+                formatted += value + ') ';
+                value = '';
+            }
+        }
+        
+        if (value.length > 0) {
+            if (value.length > 3) {
+                formatted += '000-';
+                value = value.substring(3);
+            } else {
+                formatted += value + '-';
+                value = '';
+            }
+        }
+        
+        if (value.length > 0) {
+            if (value.length > 2) {
+                formatted += '00-00';
+            } else {
+                formatted += value + '0'.repeat(2 - value.length);
+            }
+        } else {
+            formatted += '00-00';
+        }
+        
+        input.value = formatted;
+    }
+    
+    function formatIP(input) {
+        let value = input.value;
+        const original = value;
+        
+        if (value.replace(/[^0-9]/g, '').length >= 4) {
+            originalValues.ip = original;
+            document.getElementById('ipOriginal').textContent = 'Оригінал: ' + originalValues.ip;
+            document.getElementById('ipOriginal').style.display = 'block';
+        }
+        
+        let parts = value.split('.');
+        let formattedParts = [];
+        
+        for (let i = 0; i < 4; i++) {
+            if (i < parts.length && parts[i].match(/^\d+$/)) {
+                formattedParts.push('000');
+            } else if (i < parts.length) {
+                formattedParts.push(parts[i].replace(/\d/g, '0'));
+            } else {
+                formattedParts.push('000');
+            }
+        }
+        
+        input.value = formattedParts.join('.');
+    }
+    
+    function formatOffice(input) {
+        let value = input.value;
+        const original = value;
+        
+        if (value.trim().length > 0) {
+            originalValues.office = original;
+            document.getElementById('officeOriginal').textContent = 'Оригінал: ' + originalValues.office;
+            document.getElementById('officeOriginal').style.display = 'block';
+        }
+        
+        let formatted = value.replace(/\d/g, '0');
+        input.value = formatted;
+    }
+    
+    document.getElementById('phone').addEventListener('blur', function() {
+        if (this.value.trim() && !this.value.includes('_')) {
+            formatPhoneNumber(this);
+        }
+    });
+    
+    document.getElementById('phone').addEventListener('focus', function() {
+        if (originalValues.phone) {
+            this.value = originalValues.phone;
+        }
+    });
+    
+    document.getElementById('ip').addEventListener('blur', function() {
+        if (this.value.trim() && !this.value.includes('_')) {
+            formatIP(this);
+        }
+    });
+    
+    document.getElementById('ip').addEventListener('focus', function() {
+        if (originalValues.ip) {
+            this.value = originalValues.ip;
+        }
+    });
+    
+    document.getElementById('office').addEventListener('blur', function() {
+        if (this.value.trim()) {
+            formatOffice(this);
+        }
+    });
+    
+    document.getElementById('office').addEventListener('focus', function() {
+        if (originalValues.office) {
+            this.value = originalValues.office;
+        }
+    });
+    
+    window.addEventListener('load', function() {
+        if (allEmployees.length > 0) {
+            showStatus(`У базі: ${allEmployees.length} співробітників`, 'success');
+            setTimeout(() => {
+                document.getElementById('statusMessage').style.display = 'none';
+            }, 2000);
+        }
+    });
+    
+    function exportToCSV() {
+        if (allEmployees.length === 0) {
+            showStatus('Немає даних для експорту', 'error');
+            return;
+        }
+        
+        const headers = ['ID', 'Прізвище Ім\'я По батькові', 'Номер телефону', 'Email', 'IP-адреса', 'Відділ', 'Посада', 'Кабінет', 'Дод. інформація', 'Дата додавання'];
+        
+        const csvContent = [
+            headers.join(','),
+            ...allEmployees.map(emp => [
+                emp.id,
+                `"${emp.fio}"`,
+                `"${emp.phone}"`,
+                `"${emp.email}"`,
+                `"${emp.ip}"`,
+                `"${emp.department}"`,
+                `"${emp.positionText}"`,
+                `"${emp.office}"`,
+                `"${emp.additional}"`,
+                `"${new Date(emp.timestamp).toLocaleString()}"`
+            ].join(','))
+        ].join('\n');
+        
+        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `співробітники_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showStatus(`✅ Експортовано ${allEmployees.length} записів`, 'success');
+        vibratePhone();
+    }
+    
+    // Обработка касаний для мобильных
+    document.addEventListener('touchstart', function() {}, {passive: true});
+</script>
+
+</body>
+</html>
