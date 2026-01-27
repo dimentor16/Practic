@@ -289,6 +289,106 @@
             font-size: 12px;
         }
         
+        .digit-counter {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .digit-counter.limit-reached {
+            color: #f5576c;
+            font-weight: bold;
+        }
+        
+        .custom-department-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+        
+        .custom-department-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .custom-department-section h3 i {
+            color: #667eea;
+        }
+        
+        .position-management {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .position-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .position-input-group input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .add-position-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .positions-list {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .position-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .position-item:last-child {
+            border-bottom: none;
+        }
+        
+        .position-name {
+            flex: 1;
+        }
+        
+        .select-position-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
@@ -349,6 +449,14 @@
             }
             
             .add-btn {
+                width: 100%;
+            }
+            
+            .position-input-group {
+                flex-direction: column;
+            }
+            
+            .add-position-btn {
                 width: 100%;
             }
             
@@ -434,10 +542,11 @@
         
         <div class="form-row">
             <label>Номер телефону <span class="required">*</span></label>
-            <input type="tel" id="phone" placeholder="380123456789 (тільки цифри)" required
-                   pattern="[0-9]{12}" 
-                   title="Введіть 12 цифр (код країни 380 + номер)">
-            <div class="input-hint">Приклад: 380123456789 (12 цифр)</div>
+            <input type="tel" id="phone" placeholder="Введіть 12 цифр (380XXXXXXXXX)" required
+                   maxlength="12"
+                   oninput="formatPhoneInput(this)">
+            <div class="input-hint">Формат: 380XXXXXXXXX (12 цифр, починається з 380)</div>
+            <div id="phoneDigitCounter" class="digit-counter">0/12 цифр</div>
             <div id="phoneOriginal" class="original-value">Оригінал: </div>
         </div>
         
@@ -448,19 +557,21 @@
         
         <div class="form-row">
             <label>IP-адреса <span class="required">*</span></label>
-            <input type="text" id="ip" placeholder="192168001001 (тільки цифри)" required
-                   pattern="[0-9]{12}" 
-                   title="Введіть 12 цифр (4 групи по 3 цифри)">
-            <div class="input-hint">Приклад: 192168001001 (12 цифр без крапок)</div>
+            <input type="text" id="ip" placeholder="Введіть 12 цифр (XXX.XXX.XXX.XXX)" required
+                   maxlength="12"
+                   oninput="formatIPInput(this)">
+            <div class="input-hint">Формат: 12 цифр без крапок (наприклад: 192168001001)</div>
+            <div id="ipDigitCounter" class="digit-counter">0/12 цифр</div>
             <div id="ipOriginal" class="original-value">Оригінал: </div>
         </div>
         
         <div class="form-row">
             <label>Дата народження <span class="required">*</span></label>
-            <input type="text" id="birthdate" placeholder="01011990 (деньмісяцьрік)" required
-                   pattern="[0-9]{8}" 
-                   title="Введіть 8 цифр у форматі ДДММРРРР">
+            <input type="text" id="birthdate" placeholder="Введіть 8 цифр (ДДММРРРР)" required
+                   maxlength="8"
+                   oninput="formatBirthdateInput(this)">
             <div class="input-hint">Формат: ДДММРРРР (8 цифр, день-місяць-рік)</div>
+            <div id="birthdateDigitCounter" class="digit-counter">0/8 цифр</div>
             <div id="birthdateOriginal" class="original-value">Оригінал: </div>
         </div>
         
@@ -483,7 +594,7 @@
             <label>Назва нового відділу <span class="required">*</span></label>
             <div class="add-new-input">
                 <input type="text" id="customDepartmentInput" placeholder="Введіть назву нового відділу">
-                <button type="button" class="add-btn" onclick="addCustomDepartment()">Додати</button>
+                <button type="button" class="add-btn" onclick="addCustomDepartment()">Створити відділ</button>
             </div>
         </div>
         
@@ -605,18 +716,34 @@
             </div>
         </div>
         
-        <!-- Кастомный отдел -->
-        <div class="form-row hidden" id="customDepartmentPosition">
-            <label>Посада в новому відділі <span class="required">*</span></label>
-            <div class="add-new-section">
-                <div class="add-new-input">
-                    <input type="text" id="customDepartmentPositionInput" placeholder="Введіть посаду">
-                    <button type="button" class="add-btn" onclick="addCustomDepartmentPosition()">Додати посаду</button>
+        <!-- Секция управления новым отделом -->
+        <div class="form-row hidden" id="customDepartmentManagement">
+            <div class="custom-department-section">
+                <h3><i class="fa fa-building"></i> Керування новим відділом</h3>
+                
+                <div class="position-management">
+                    <div class="position-input-group">
+                        <input type="text" id="newPositionInput" placeholder="Введіть назву нової посади">
+                        <button type="button" class="add-position-btn" onclick="addPositionToNewDepartment()">
+                            <i class="fa fa-plus"></i> Додати посаду
+                        </button>
+                    </div>
+                    
+                    <div class="positions-list" id="newDepartmentPositionsList">
+                        <!-- Сюда будут добавляться должности -->
+                        <div class="position-item" style="color: #666; font-style: italic;">
+                            Додайте першу посаду для цього відділу
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label>Оберіть посаду для співробітника <span class="required">*</span></label>
+                        <select id="newDepartmentPositionSelect" required>
+                            <option value="">Оберіть посаду</option>
+                            <!-- Должности будут добавляться сюда -->
+                        </select>
+                    </div>
                 </div>
-                <div class="user-positions-list" id="customDepartmentPositionsList"></div>
-                <select id="customDepartmentPositionSelect" class="hidden">
-                    <option value="">Оберіть посаду</option>
-                </select>
             </div>
         </div>
         
@@ -644,21 +771,37 @@
         office: ''
     };
     
-    // Хранение пользовательских должностей по отделам
-    let userPositions = JSON.parse(localStorage.getItem('userPositions')) || {
-        it: [],
-        sales: [],
-        production: [],
-        hr: [],
-        accounting: [],
-        other: [],
-        customDepartments: {}
-    };
-    
-    // Хранение пользовательских отделов
+    // Хранение пользовательских отделов и их должностей
     let userDepartments = JSON.parse(localStorage.getItem('userDepartments')) || [];
     
-    // Загрузка пользовательских отделов при загрузке страницы
+    // Текущий создаваемый отдел
+    let currentNewDepartment = null;
+    
+    // Ограничения по количеству цифр
+    const digitLimits = {
+        phone: 12,
+        ip: 12,
+        birthdate: 8
+    };
+    
+    // Инициализация при загрузке
+    window.addEventListener('load', function() {
+        loadUserDepartments();
+        
+        // Инициализация счетчиков
+        updateDigitCounter('phone', document.getElementById('phone').value.replace(/\D/g, '').length);
+        updateDigitCounter('ip', document.getElementById('ip').value.replace(/\D/g, '').length);
+        updateDigitCounter('birthdate', document.getElementById('birthdate').value.replace(/\D/g, '').length);
+        
+        if (allEmployees.length > 0) {
+            showStatus(`У базі: ${allEmployees.length} співробітників`, 'success');
+            setTimeout(() => {
+                document.getElementById('statusMessage').style.display = 'none';
+            }, 2000);
+        }
+    });
+    
+    // Загрузка пользовательских отделов
     function loadUserDepartments() {
         const departmentSelect = document.getElementById('department');
         
@@ -683,31 +826,153 @@
         });
     }
     
-    // Загрузка пользовательских должностей
-    function loadUserPositions() {
-        // Загружаем для каждого отдела
-        const departments = ['it', 'sales', 'production', 'hr', 'accounting', 'other'];
+    // Создание нового отдела
+    function addCustomDepartment() {
+        const input = document.getElementById('customDepartmentInput');
+        const departmentName = input.value.trim();
         
-        departments.forEach(dept => {
-            const positionsList = document.getElementById(dept + 'UserPositions');
-            if (positionsList && userPositions[dept]) {
-                positionsList.innerHTML = '';
-                userPositions[dept].forEach((position, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'user-position-item';
-                    div.innerHTML = `
-                        <span>${position}</span>
-                        <button type="button" class="remove-position-btn" onclick="removeUserPosition('${dept}', ${index})">×</button>
-                    `;
-                    positionsList.appendChild(div);
-                });
-            }
+        if (!departmentName) {
+            showStatus('Введіть назву відділу', 'error');
+            vibratePhone();
+            return;
+        }
+        
+        // Проверяем, не существует ли уже такого отдела
+        const existingDept = userDepartments.find(d => d.name.toLowerCase() === departmentName.toLowerCase());
+        if (existingDept) {
+            showStatus('Такий відділ вже існує', 'error');
+            vibratePhone();
+            return;
+        }
+        
+        // Создаем новый отдел
+        currentNewDepartment = {
+            id: Date.now(),
+            name: departmentName,
+            positions: []
+        };
+        
+        // Показываем секцию управления отделом
+        document.getElementById('customDepartmentRow').classList.add('hidden');
+        document.getElementById('customDepartmentManagement').classList.remove('hidden');
+        
+        // Обновляем список позиций (пустой)
+        updateNewDepartmentPositionsList();
+        
+        // Очищаем поле ввода
+        input.value = '';
+        
+        showStatus('Створено новий відділ. Тепер додайте посади.', 'success');
+        vibratePhone();
+    }
+    
+    // Добавление должности в новый отдел
+    function addPositionToNewDepartment() {
+        const input = document.getElementById('newPositionInput');
+        const positionName = input.value.trim();
+        
+        if (!positionName) {
+            showStatus('Введіть назву посади', 'error');
+            vibratePhone();
+            return;
+        }
+        
+        if (!currentNewDepartment) {
+            showStatus('Спочатку створіть відділ', 'error');
+            vibratePhone();
+            return;
+        }
+        
+        // Проверяем, не существует ли уже такой должности
+        if (currentNewDepartment.positions.includes(positionName)) {
+            showStatus('Така посада вже існує', 'error');
+            vibratePhone();
+            return;
+        }
+        
+        // Добавляем должность
+        currentNewDepartment.positions.push(positionName);
+        
+        // Обновляем интерфейс
+        updateNewDepartmentPositionsList();
+        
+        // Добавляем в выпадающий список
+        const select = document.getElementById('newDepartmentPositionSelect');
+        const option = document.createElement('option');
+        option.value = positionName;
+        option.textContent = positionName;
+        select.appendChild(option);
+        
+        // Выбираем новую должность
+        select.value = positionName;
+        
+        // Очищаем поле ввода
+        input.value = '';
+        
+        showStatus('Посаду додано', 'success');
+        vibratePhone();
+    }
+    
+    // Обновление списка должностей в новом отделе
+    function updateNewDepartmentPositionsList() {
+        const list = document.getElementById('newDepartmentPositionsList');
+        list.innerHTML = '';
+        
+        if (!currentNewDepartment || currentNewDepartment.positions.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'position-item';
+            emptyMsg.style.color = '#666';
+            emptyMsg.style.fontStyle = 'italic';
+            emptyMsg.textContent = 'Додайте першу посаду для цього відділу';
+            list.appendChild(emptyMsg);
+            return;
+        }
+        
+        currentNewDepartment.positions.forEach((position, index) => {
+            const item = document.createElement('div');
+            item.className = 'position-item';
+            item.innerHTML = `
+                <span class="position-name">${position}</span>
+                <button type="button" class="remove-position-btn" onclick="removePositionFromNewDepartment(${index})">×</button>
+            `;
+            list.appendChild(item);
         });
     }
     
+    // Удаление должности из нового отдела
+    function removePositionFromNewDepartment(index) {
+        if (!currentNewDepartment || !currentNewDepartment.positions[index]) {
+            return;
+        }
+        
+        const positionName = currentNewDepartment.positions[index];
+        
+        // Удаляем из массива
+        currentNewDepartment.positions.splice(index, 1);
+        
+        // Удаляем из выпадающего списка
+        const select = document.getElementById('newDepartmentPositionSelect');
+        const option = select.querySelector(`option[value="${positionName}"]`);
+        if (option) {
+            option.remove();
+        }
+        
+        // Обновляем список
+        updateNewDepartmentPositionsList();
+        
+        showStatus('Посаду видалено', 'success');
+        vibratePhone();
+    }
+    
+    // Показать соответствующую секцию при выборе отдела
     function showPosition() {
-        const allPositions = ['itPositions', 'salesPositions', 'productionPositions', 'hrPositions', 'accountingPositions', 'otherPosition', 'customDepartmentRow', 'customDepartmentPosition'];
-        allPositions.forEach(id => {
+        const allSections = [
+            'itPositions', 'salesPositions', 'productionPositions', 
+            'hrPositions', 'accountingPositions', 'otherPosition', 
+            'customDepartmentRow', 'customDepartmentManagement'
+        ];
+        
+        allSections.forEach(id => {
             document.getElementById(id).classList.add('hidden');
         });
         
@@ -720,9 +985,11 @@
         const dept = document.getElementById('department').value;
         
         if (dept.startsWith('user_department_')) {
-            // Пользовательский отдел
-            document.getElementById('customDepartmentPosition').classList.remove('hidden');
-            updateCustomDepartmentPositions(dept);
+            // Существующий пользовательский отдел
+            showExistingCustomDepartment(dept);
+        } else if (dept === 'custom') {
+            // Создание нового отдела
+            document.getElementById('customDepartmentRow').classList.remove('hidden');
         } else if (dept === 'it') {
             document.getElementById('itPositions').classList.remove('hidden');
         } else if (dept === 'sales') {
@@ -735,53 +1002,95 @@
             document.getElementById('accountingPositions').classList.remove('hidden');
         } else if (dept === 'other') {
             document.getElementById('otherPosition').classList.remove('hidden');
-        } else if (dept === 'custom') {
-            document.getElementById('customDepartmentRow').classList.remove('hidden');
         }
     }
     
+    // Показать существующий пользовательский отдел
+    function showExistingCustomDepartment(departmentId) {
+        // Находим отдел
+        const id = departmentId.replace('user_department_', '');
+        const dept = userDepartments.find(d => d.id == id);
+        
+        if (dept) {
+            // Устанавливаем текущий отдел
+            currentNewDepartment = dept;
+            
+            // Показываем секцию управления
+            document.getElementById('customDepartmentManagement').classList.remove('hidden');
+            
+            // Обновляем выпадающий список должностей
+            const select = document.getElementById('newDepartmentPositionSelect');
+            select.innerHTML = '<option value="">Оберіть посаду</option>';
+            
+            dept.positions.forEach(position => {
+                const option = document.createElement('option');
+                option.value = position;
+                option.textContent = position;
+                select.appendChild(option);
+            });
+            
+            // Обновляем список должностей
+            updateNewDepartmentPositionsList();
+        }
+    }
+    
+    // Проверка на добавление новой позиции в стандартных отделах
     function checkCustomPosition(select, department) {
         if (select.value === 'custom') {
-            // Показать секцию добавления новой позиции
             document.getElementById(department + 'CustomPositionSection').classList.remove('hidden');
             select.value = '';
         }
     }
     
+    // Добавление позиции в стандартный отдел
     function addCustomPosition(department) {
         const input = document.getElementById(department + 'CustomPositionInput');
         const positionName = input.value.trim();
         
         if (!positionName) {
             showStatus('Введіть назву посади', 'error');
+            vibratePhone();
             return;
         }
         
         // Добавляем позицию в массив
-        if (!userPositions[department]) {
-            userPositions[department] = [];
+        if (!window.userPositions) {
+            window.userPositions = {
+                it: [],
+                sales: [],
+                production: [],
+                hr: [],
+                accounting: [],
+                other: []
+            };
         }
         
-        if (!userPositions[department].includes(positionName)) {
-            userPositions[department].push(positionName);
-            localStorage.setItem('userPositions', JSON.stringify(userPositions));
-            
-            // Обновляем список
-            loadUserPositions();
+        if (!window.userPositions[department]) {
+            window.userPositions[department] = [];
+        }
+        
+        if (!window.userPositions[department].includes(positionName)) {
+            window.userPositions[department].push(positionName);
+            localStorage.setItem('userPositions', JSON.stringify(window.userPositions));
             
             // Добавляем опцию в select
-            const select = document.getElementById(department + 'Position');
-            const option = document.createElement('option');
-            option.value = 'user_' + positionName.toLowerCase().replace(/\s+/g, '_');
-            option.textContent = positionName;
-            option.dataset.custom = true;
-            
-            // Вставляем перед опцией "Добавить новую позицию"
-            const addNewOption = select.querySelector('option[value="custom"]');
-            select.insertBefore(option, addNewOption);
-            
-            // Выбираем новую позицию
-            select.value = option.value;
+            const select = document.getElementById(department + 'Position') || 
+                          document.getElementById(department + 'PositionSelect');
+            if (select) {
+                const option = document.createElement('option');
+                option.value = 'user_' + positionName.toLowerCase().replace(/\s+/g, '_');
+                option.textContent = positionName;
+                option.dataset.custom = true;
+                
+                const addNewOption = select.querySelector('option[value="custom"]');
+                if (addNewOption) {
+                    select.insertBefore(option, addNewOption);
+                } else {
+                    select.appendChild(option);
+                }
+                
+                select.value = option.value;
+            }
             
             // Скрываем секцию добавления
             document.getElementById(department + 'CustomPositionSection').classList.add('hidden');
@@ -790,179 +1099,14 @@
             input.value = '';
             
             showStatus('Посаду додано', 'success');
+            vibratePhone();
         } else {
             showStatus('Така посада вже існує', 'error');
+            vibratePhone();
         }
     }
     
-    function removeUserPosition(department, index) {
-        const positionName = userPositions[department][index];
-        
-        // Удаляем из массива
-        userPositions[department].splice(index, 1);
-        localStorage.setItem('userPositions', JSON.stringify(userPositions));
-        
-        // Удаляем опцию из select
-        const select = document.getElementById(department + 'Position');
-        const option = select.querySelector(`option[value="user_${positionName.toLowerCase().replace(/\s+/g, '_')}"]`);
-        if (option) {
-            option.remove();
-        }
-        
-        // Обновляем список
-        loadUserPositions();
-        
-        showStatus('Посаду видалено', 'success');
-    }
-    
-    function addCustomDepartment() {
-        const input = document.getElementById('customDepartmentInput');
-        const departmentName = input.value.trim();
-        
-        if (!departmentName) {
-            showStatus('Введіть назву відділу', 'error');
-            return;
-        }
-        
-        // Создаем ID для отдела
-        const departmentId = Date.now();
-        
-        // Добавляем отдел в массив
-        userDepartments.push({
-            id: departmentId,
-            name: departmentName,
-            positions: []
-        });
-        
-        localStorage.setItem('userDepartments', JSON.stringify(userDepartments));
-        
-        // Обновляем список отделов
-        loadUserDepartments();
-        
-        // Выбираем новый отдел
-        document.getElementById('department').value = 'user_department_' + departmentId;
-        
-        // Скрываем поле ввода и показываем поле для должностей
-        document.getElementById('customDepartmentRow').classList.add('hidden');
-        document.getElementById('customDepartmentPosition').classList.remove('hidden');
-        
-        // Обновляем список позиций для этого отдела
-        updateCustomDepartmentPositions('user_department_' + departmentId);
-        
-        // Очищаем поле ввода
-        input.value = '';
-        
-        showStatus('Відділ додано', 'success');
-    }
-    
-    function updateCustomDepartmentPositions(departmentId) {
-        const select = document.getElementById('customDepartmentPositionSelect');
-        select.innerHTML = '<option value="">Оберіть посаду</option>';
-        
-        // Находим отдел
-        const dept = userDepartments.find(d => 'user_department_' + d.id === departmentId);
-        
-        if (dept && dept.positions) {
-            dept.positions.forEach(position => {
-                const option = document.createElement('option');
-                option.value = position;
-                option.textContent = position;
-                select.appendChild(option);
-            });
-        }
-        
-        select.classList.remove('hidden');
-    }
-    
-    function addCustomDepartmentPosition() {
-        const input = document.getElementById('customDepartmentPositionInput');
-        const positionName = input.value.trim();
-        const departmentId = document.getElementById('department').value;
-        
-        if (!positionName) {
-            showStatus('Введіть назву посади', 'error');
-            return;
-        }
-        
-        // Находим ID отдела
-        const id = departmentId.replace('user_department_', '');
-        const deptIndex = userDepartments.findIndex(d => d.id == id);
-        
-        if (deptIndex !== -1) {
-            // Инициализируем массив позиций, если его нет
-            if (!userDepartments[deptIndex].positions) {
-                userDepartments[deptIndex].positions = [];
-            }
-            
-            // Добавляем позицию
-            if (!userDepartments[deptIndex].positions.includes(positionName)) {
-                userDepartments[deptIndex].positions.push(positionName);
-                localStorage.setItem('userDepartments', JSON.stringify(userDepartments));
-                
-                // Обновляем список в интерфейсе
-                updateListAndSelect(departmentId, positionName);
-                
-                // Очищаем поле ввода
-                input.value = '';
-                
-                showStatus('Посаду додано', 'success');
-            } else {
-                showStatus('Така посада вже існує', 'error');
-            }
-        }
-    }
-    
-    function updateListAndSelect(departmentId, positionName) {
-        // Добавляем в список
-        const list = document.getElementById('customDepartmentPositionsList');
-        const div = document.createElement('div');
-        div.className = 'user-position-item';
-        div.innerHTML = `
-            <span>${positionName}</span>
-            <button type="button" class="remove-position-btn" onclick="removeCustomDepartmentPosition('${departmentId}', '${positionName}')">×</button>
-        `;
-        list.appendChild(div);
-        
-        // Добавляем в select
-        const select = document.getElementById('customDepartmentPositionSelect');
-        const option = document.createElement('option');
-        option.value = positionName;
-        option.textContent = positionName;
-        select.appendChild(option);
-    }
-    
-    function removeCustomDepartmentPosition(departmentId, positionName) {
-        const id = departmentId.replace('user_department_', '');
-        const deptIndex = userDepartments.findIndex(d => d.id == id);
-        
-        if (deptIndex !== -1 && userDepartments[deptIndex].positions) {
-            // Удаляем из массива
-            const posIndex = userDepartments[deptIndex].positions.indexOf(positionName);
-            if (posIndex !== -1) {
-                userDepartments[deptIndex].positions.splice(posIndex, 1);
-                localStorage.setItem('userDepartments', JSON.stringify(userDepartments));
-                
-                // Удаляем из интерфейса
-                const list = document.getElementById('customDepartmentPositionsList');
-                const items = list.querySelectorAll('.user-position-item');
-                items.forEach(item => {
-                    if (item.querySelector('span').textContent === positionName) {
-                        item.remove();
-                    }
-                });
-                
-                // Удаляем из select
-                const select = document.getElementById('customDepartmentPositionSelect');
-                const option = select.querySelector(`option[value="${positionName}"]`);
-                if (option) {
-                    option.remove();
-                }
-                
-                showStatus('Посаду видалено', 'success');
-            }
-        }
-    }
-    
+    // Сохранение формы
     function saveForm() {
         if (validateForm()) {
             const data = getFormData();
@@ -982,6 +1126,13 @@
                 additional: data.additional,
                 timestamp: new Date().toISOString()
             };
+            
+            // Если это новый отдел - сохраняем его
+            if (currentNewDepartment && !userDepartments.find(d => d.id === currentNewDepartment.id)) {
+                userDepartments.push(currentNewDepartment);
+                localStorage.setItem('userDepartments', JSON.stringify(userDepartments));
+                loadUserDepartments();
+            }
             
             allEmployees.push(employee);
             localStorage.setItem('employees', JSON.stringify(allEmployees));
@@ -1006,8 +1157,13 @@
         if (confirm('Ви впевнені, що хочете видалити всі дані форми?')) {
             document.getElementById('employeeForm').reset();
             
-            const allPositions = ['itPositions', 'salesPositions', 'productionPositions', 'hrPositions', 'accountingPositions', 'otherPosition', 'customDepartmentRow', 'customDepartmentPosition'];
-            allPositions.forEach(id => {
+            const allSections = [
+                'itPositions', 'salesPositions', 'productionPositions', 
+                'hrPositions', 'accountingPositions', 'otherPosition', 
+                'customDepartmentRow', 'customDepartmentManagement'
+            ];
+            
+            allSections.forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             
@@ -1016,6 +1172,14 @@
             document.getElementById('ipOriginal').style.display = 'none';
             document.getElementById('birthdateOriginal').style.display = 'none';
             document.getElementById('officeOriginal').style.display = 'none';
+            
+            // Сбрасываем счетчики
+            updateDigitCounter('phone', 0);
+            updateDigitCounter('ip', 0);
+            updateDigitCounter('birthdate', 0);
+            
+            // Сбрасываем текущий отдел
+            currentNewDepartment = null;
             
             showStatus('Форму очищено', 'success');
             vibratePhone();
@@ -1049,6 +1213,13 @@
                 showError(input, `Поле "${field.name}" має містити рівно ${field.length} цифр`);
                 return false;
             }
+        }
+        
+        // Проверка телефона (должен начинаться с 380)
+        const phone = document.getElementById('phone').value.replace(/\D/g, '');
+        if (!phone.startsWith('380')) {
+            showError(document.getElementById('phone'), 'Номер телефону має починатися з 380');
+            return false;
         }
         
         // Проверка даты рождения (ДДММГГГГ)
@@ -1092,40 +1263,32 @@
             return false;
         }
         
-        // Проверка должности в зависимости от отдела
+        // Проверка должности
         let position = '';
         let positionValid = true;
         
-        if (department.startsWith('user_department_')) {
-            // Для пользовательского отдела
-            position = document.getElementById('customDepartmentPositionSelect').value;
+        if (department.startsWith('user_department_') || department === 'custom') {
+            // Для пользовательского отдела или нового отдела
+            position = document.getElementById('newDepartmentPositionSelect').value;
             positionValid = !!position;
-        } else if (department === 'custom') {
-            showStatus('Спочатку додайте новий відділ', 'error');
-            document.getElementById('customDepartmentRow').classList.remove('hidden');
-            return false;
-        } else if (department === 'it') {
-            position = document.getElementById('itPosition').value;
-            positionValid = !!position;
-        } else if (department === 'sales') {
-            position = document.getElementById('salesPosition').value;
-            positionValid = !!position;
-        } else if (department === 'production') {
-            position = document.getElementById('productionPosition').value;
-            positionValid = !!position;
-        } else if (department === 'hr') {
-            position = document.getElementById('hrPosition').value;
-            positionValid = !!position;
-        } else if (department === 'accounting') {
-            position = document.getElementById('accountingPosition').value;
-            positionValid = !!position;
-        } else if (department === 'other') {
-            position = document.getElementById('otherPositionSelect').value;
-            positionValid = !!position;
+            
+            // Для нового отдела проверяем, есть ли должности
+            if (department === 'custom' && (!currentNewDepartment || currentNewDepartment.positions.length === 0)) {
+                showStatus('Додайте хоча б одну посаду для нового відділу', 'error');
+                return false;
+            }
+        } else {
+            // Для стандартных отделов
+            const selectId = department === 'other' ? 'otherPositionSelect' : department + 'Position';
+            const select = document.getElementById(selectId);
+            if (select) {
+                position = select.value;
+                positionValid = !!position;
+            }
         }
         
         if (!positionValid) {
-            showStatus('Оберіть або додайте посаду', 'error');
+            showStatus('Оберіть посаду', 'error');
             return false;
         }
         
@@ -1160,32 +1323,26 @@
         
         // Получаем название отдела
         if (department.startsWith('user_department_')) {
+            // Существующий пользовательский отдел
             const id = department.replace('user_department_', '');
             const dept = userDepartments.find(d => d.id == id);
             departmentText = dept ? dept.name : 'Невідомий відділ';
-            position = document.getElementById('customDepartmentPositionSelect').value;
+            position = document.getElementById('newDepartmentPositionSelect').value;
+            positionText = position;
+        } else if (department === 'custom') {
+            // Новый отдел
+            departmentText = currentNewDepartment ? currentNewDepartment.name : 'Новий відділ';
+            position = document.getElementById('newDepartmentPositionSelect').value;
             positionText = position;
         } else {
+            // Стандартный отдел
             departmentText = document.getElementById('department').options[document.getElementById('department').selectedIndex]?.text || '';
             
-            if (department === 'it') {
-                position = document.getElementById('itPosition').value;
-                positionText = document.getElementById('itPosition').options[document.getElementById('itPosition').selectedIndex]?.text || '';
-            } else if (department === 'sales') {
-                position = document.getElementById('salesPosition').value;
-                positionText = document.getElementById('salesPosition').options[document.getElementById('salesPosition').selectedIndex]?.text || '';
-            } else if (department === 'production') {
-                position = document.getElementById('productionPosition').value;
-                positionText = document.getElementById('productionPosition').options[document.getElementById('productionPosition').selectedIndex]?.text || '';
-            } else if (department === 'hr') {
-                position = document.getElementById('hrPosition').value;
-                positionText = document.getElementById('hrPosition').options[document.getElementById('hrPosition').selectedIndex]?.text || '';
-            } else if (department === 'accounting') {
-                position = document.getElementById('accountingPosition').value;
-                positionText = document.getElementById('accountingPosition').options[document.getElementById('accountingPosition').selectedIndex]?.text || '';
-            } else if (department === 'other') {
-                position = document.getElementById('otherPositionSelect').value;
-                positionText = document.getElementById('otherPositionSelect').options[document.getElementById('otherPositionSelect').selectedIndex]?.text || '';
+            const selectId = department === 'other' ? 'otherPositionSelect' : department + 'Position';
+            const select = document.getElementById(selectId);
+            if (select) {
+                position = select.value;
+                positionText = select.options[select.selectedIndex]?.text || '';
             }
         }
         
@@ -1203,30 +1360,114 @@
         };
     }
     
-    // Функция для ввода только цифр
-    function allowOnlyNumbers(input) {
+    // Функции для обработки ввода цифр (те же самые)
+    function formatPhoneInput(input) {
         let value = input.value.replace(/\D/g, '');
-        const original = value;
-        const fieldId = input.id;
+        const maxDigits = digitLimits.phone;
         
-        // Сохраняем оригинальное значение
-        if (value.length > 0) {
-            originalValues[fieldId] = original;
-            const originalDiv = document.getElementById(fieldId + 'Original');
-            if (originalDiv) {
-                originalDiv.textContent = 'Оригінал: ' + originalValues[fieldId];
-                originalDiv.style.display = 'block';
+        if (value.length > maxDigits) {
+            value = value.substring(0, maxDigits);
+        }
+        
+        originalValues.phone = value;
+        document.getElementById('phoneOriginal').textContent = 'Оригінал: ' + originalValues.phone;
+        document.getElementById('phoneOriginal').style.display = 'block';
+        
+        updateDigitCounter('phone', value.length);
+        
+        if (value.length > 0 && !value.startsWith('380')) {
+            if (value.length <= 9) {
+                value = '380' + value;
+                if (value.length > maxDigits) {
+                    value = value.substring(0, maxDigits);
+                }
             }
         }
         
+        if (value.length === maxDigits) {
+            document.getElementById('phoneDigitCounter').classList.add('limit-reached');
+        } else {
+            document.getElementById('phoneDigitCounter').classList.remove('limit-reached');
+        }
+        
         input.value = value;
+    }
+    
+    function formatIPInput(input) {
+        let value = input.value.replace(/\D/g, '');
+        const maxDigits = digitLimits.ip;
+        
+        if (value.length > maxDigits) {
+            value = value.substring(0, maxDigits);
+        }
+        
+        originalValues.ip = value;
+        document.getElementById('ipOriginal').textContent = 'Оригінал: ' + originalValues.ip;
+        document.getElementById('ipOriginal').style.display = 'block';
+        
+        updateDigitCounter('ip', value.length);
+        
+        if (value.length === maxDigits) {
+            document.getElementById('ipDigitCounter').classList.add('limit-reached');
+        } else {
+            document.getElementById('ipDigitCounter').classList.remove('limit-reached');
+        }
+        
+        input.value = value;
+    }
+    
+    function formatBirthdateInput(input) {
+        let value = input.value.replace(/\D/g, '');
+        const maxDigits = digitLimits.birthdate;
+        
+        if (value.length > maxDigits) {
+            value = value.substring(0, maxDigits);
+        }
+        
+        originalValues.birthdate = value;
+        document.getElementById('birthdateOriginal').textContent = 'Оригінал: ' + originalValues.birthdate;
+        document.getElementById('birthdateOriginal').style.display = 'block';
+        
+        updateDigitCounter('birthdate', value.length);
+        
+        if (value.length === maxDigits) {
+            document.getElementById('birthdateDigitCounter').classList.add('limit-reached');
+        } else {
+            document.getElementById('birthdateDigitCounter').classList.remove('limit-reached');
+        }
+        
+        input.value = value;
+    }
+    
+    function updateDigitCounter(field, currentDigits) {
+        const counter = document.getElementById(field + 'DigitCounter');
+        const maxDigits = digitLimits[field];
+        counter.textContent = `${currentDigits}/${maxDigits} цифр`;
+    }
+    
+    function preventExtraInput(event, maxDigits) {
+        const input = event.target;
+        const value = input.value.replace(/\D/g, '');
+        
+        if (value.length >= maxDigits && event.key !== 'Backspace' && event.key !== 'Delete' && 
+            event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'Tab') {
+            event.preventDefault();
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+            
+            input.classList.add('input-error');
+            setTimeout(() => {
+                input.classList.remove('input-error');
+            }, 500);
+        }
     }
     
     // Форматирование при потере фокуса
     function formatPhoneNumber(input) {
         let value = input.value.replace(/\D/g, '');
         if (value.length === 12) {
-            // Форматируем как +380 (XXX) XXX-XX-XX
             let formatted = '+380 (' + value.substring(3, 6) + ') ' + 
                            value.substring(6, 9) + '-' + 
                            value.substring(9, 11) + '-' + 
@@ -1238,7 +1479,6 @@
     function formatIP(input) {
         let value = input.value.replace(/\D/g, '');
         if (value.length === 12) {
-            // Форматируем как XXX.XXX.XXX.XXX
             let formatted = value.substring(0, 3) + '.' + 
                           value.substring(3, 6) + '.' + 
                           value.substring(6, 9) + '.' + 
@@ -1250,7 +1490,6 @@
     function formatBirthdate(input) {
         let value = input.value.replace(/\D/g, '');
         if (value.length === 8) {
-            // Форматируем как ДД.ММ.РРРР
             let formatted = value.substring(0, 2) + '.' + 
                           value.substring(2, 4) + '.' + 
                           value.substring(4, 8);
@@ -1259,10 +1498,6 @@
     }
     
     // Обработчики событий
-    document.getElementById('phone').addEventListener('input', function() {
-        allowOnlyNumbers(this);
-    });
-    
     document.getElementById('phone').addEventListener('blur', function() {
         if (this.value.replace(/\D/g, '').length === 12) {
             formatPhoneNumber(this);
@@ -1275,10 +1510,6 @@
         }
     });
     
-    document.getElementById('ip').addEventListener('input', function() {
-        allowOnlyNumbers(this);
-    });
-    
     document.getElementById('ip').addEventListener('blur', function() {
         if (this.value.replace(/\D/g, '').length === 12) {
             formatIP(this);
@@ -1289,10 +1520,6 @@
         if (originalValues.ip) {
             this.value = originalValues.ip;
         }
-    });
-    
-    document.getElementById('birthdate').addEventListener('input', function() {
-        allowOnlyNumbers(this);
     });
     
     document.getElementById('birthdate').addEventListener('blur', function() {
@@ -1320,17 +1547,17 @@
         }
     });
     
-    // Инициализация при загрузке страницы
-    window.addEventListener('load', function() {
-        loadUserDepartments();
-        loadUserPositions();
-        
-        if (allEmployees.length > 0) {
-            showStatus(`У базі: ${allEmployees.length} співробітників`, 'success');
-            setTimeout(() => {
-                document.getElementById('statusMessage').style.display = 'none';
-            }, 2000);
-        }
+    // Блокировка ввода при достижении лимита
+    document.getElementById('phone').addEventListener('keydown', function(e) {
+        preventExtraInput(e, digitLimits.phone);
+    });
+    
+    document.getElementById('ip').addEventListener('keydown', function(e) {
+        preventExtraInput(e, digitLimits.ip);
+    });
+    
+    document.getElementById('birthdate').addEventListener('keydown', function(e) {
+        preventExtraInput(e, digitLimits.birthdate);
     });
     
     function exportToCSV() {
